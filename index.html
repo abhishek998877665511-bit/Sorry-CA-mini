@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit of Love & Sorry</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffe6e9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Heart Background Animation */
+        .heart {
+            position: absolute;
+            color: #ff4d6d;
+            font-size: 20px;
+            animation: fall linear infinite;
+            top: -10%;
+            z-index: 1;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(105vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Container Card */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            z-index: 10;
+            border: 3px solid #ff758f;
+        }
+
+        h1 {
+            color: #c9184a;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            color: #4a4a4a;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn {
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
+        }
+
+        .btn:hover {
+            background: #c9184a;
+            transform: scale(1.05);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Fluctuating No Button */
+        .btn-no {
+            background: #6c757d;
+            animation: pulse 0.6s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio Element -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="https://mp3tourl.com/audio/1787834832911-d619eb98-5278-41c1-ae46-3f67188f0d6c.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="card">
+        <h1 id="title">A Small Reconciliation Request... ❤️</h1>
+        <div class="question-text" id="questionBox">
+            CA Topper ji, mere paas aapke liye kuch zaroori questions hain...
+        </div>
+
+        <button class="btn" id="startBtn" onclick="startQuiz()">Start Audit Request 📑</button>
+
+        <div class="btn-group hidden" id="nextGroup">
+            <button class="btn" onclick="nextQuestion()">Next Question ➡️</button>
+        </div>
+
+        <div class="btn-group hidden" id="finalGroup">
+            <button class="btn" onclick="sayYes()">Haan, Maaf Kiya ❤️</button>
+            <button class="btn btn-no" id="noBtn" onclick="handleNoClick()" onmouseover="handleNoHover()">Nahi 😜</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            "1. क्या आप अपनी बैलेंस शीट में मेरी गलती को माफ़ कर मुझे अपनी लाइफ का ऑडिट पार्टनर बनाएंगी?",
+            "2. जिस तरह आप पढ़ाई में सारी मुश्किलों का हल निकालती हैं, क्या वैसे ही मेरी इस गलती का ऑडिट कर माफ़ी दे सकती हैं?",
+            "3. मेरा दिल आपकी हर बात का हिसाब रखता है, क्या इस बार मेरे sorry को बिना किसी बैलेंस के स्वीकार कर सकती हैं?",
+            "4. CA की मुश्किल पढ़ाई के बाद क्या आप मुझे थोड़ा समय देकर मेरे दिल के घावों का रिकॉन्सिलिएशन कर सकती हैं?",
+            "5. जैसे एक टॉपर हर सवाल का जवाब जानती है, क्या आप मुझे माफ़ करके मेरे चेहरे पर खोई हुई मुस्कान का टैक्स लगा सकती हैं?"
+        ];
+
+        let currentIndex = 0;
+        let noClickCount = 0; // "Nahi" बटन के क्लिक गिनने के लिए counter
+
+        // Background Floating Hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 2 + 's';
+            heart.style.fontSize = Math.random() * 15 + 15 + 'px';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
+        }
+        setInterval(createHeart, 300);
+
+        // Quiz Logic
+        function startQuiz() {
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('nextGroup').classList.remove('hidden');
+            
+            // Audio Play Logic
+            const audio = document.getElementById('bgMusic');
+            audio.play().catch((err) => console.log("Audio playback failed: ", err));
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            document.getElementById('questionBox').innerText = questions[currentIndex];
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                showQuestion();
+            } else {
+                document.getElementById('title').innerText = "Final Reconciliation Verdict ⚖️";
+                document.getElementById('questionBox').innerText = "क्या तुम मेरे को माफ कर रही हो?";
+                document.getElementById('nextGroup').classList.add('hidden');
+                document.getElementById('finalGroup').classList.remove('hidden');
+            }
+        }
+
+        // Logic for "Nahi" button clicks & movement
+        function handleNoClick() {
+            const btn = document.getElementById('noBtn');
+            noClickCount++;
+
+            if (noClickCount === 1) {
+                btn.innerText = "नहीं होगा 😜";
+            } else if (noClickCount === 2) {
+                btn.innerText = "अब तो कर दो topper 🥺";
+            } else if (noClickCount >= 3) {
+                btn.innerText = "प्लीज... 😭";
+                moveNoButton(); // तीसरे क्लिक पर भागना शुरू कर देगा
+            }
+        }
+
+        function handleNoHover() {
+            // जब 3 क्लिक पूरे हो जाएँगे, तो कर्सर पास लाते ही बटन भागने लगेगा
+            if (noClickCount >= 3) {
+                moveNoButton();
+            }
+        }
+
+        function moveNoButton() {
+            const btn = document.getElementById('noBtn');
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth - 40);
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight - 40);
+
+            btn.style.position = 'fixed';
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+        }
+
+        function sayYes() {
+            document.getElementById('title').innerText = "Audit Passed! 🎉";
+            document.getElementById('questionBox').innerText = "Thank you so much! Balance Sheet Tally ho gayi! ❤️✨";
+            document.getElementById('finalGroup').classList.add('hidden');
+        }
+    </script>
+
+</body>
+</html>
+
