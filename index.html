@@ -1,240 +1,425 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit of Love & Sorry</title>
+    <title>Interactive Date Proposal</title>
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #ffe6e9;
-            margin: 0;
-            padding: 0;
+            background-color: #fce4ec; /* Light pink background */
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             overflow: hidden;
             position: relative;
         }
 
-        /* Heart Background Animation */
-        .heart {
+        /* Sound Control Button */
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #e91e63;
+            color: #e91e63;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 100;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Falling Hearts Animation Container */
+        .heart-container {
             position: absolute;
-            color: #ff4d6d;
-            font-size: 20px;
-            animation: fall linear infinite;
-            top: -10%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
             z-index: 1;
+        }
+
+        .falling-heart {
+            position: absolute;
+            top: -10vh;
+            font-size: 24px;
+            user-select: none;
+            animation: fall linear infinite;
         }
 
         @keyframes fall {
             0% {
-                transform: translateY(0) rotate(0deg);
+                transform: translateY(-10vh) rotate(0deg);
                 opacity: 1;
             }
             100% {
-                transform: translateY(105vh) rotate(360deg);
-                opacity: 0;
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0.2;
             }
         }
 
-        /* Container Card */
-        .card {
+        /* Page Container */
+        .page {
+            display: none;
             background: rgba(255, 255, 255, 0.95);
             padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            max-width: 500px;
-            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
             z-index: 10;
-            border: 3px solid #ff758f;
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-in-out;
         }
 
-        h1 {
-            color: #c9184a;
-            font-size: 24px;
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h2 {
+            color: #880e4f;
             margin-bottom: 20px;
-        }
-
-        .question-text {
-            font-size: 18px;
-            color: #4a4a4a;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
-            line-height: 1.5;
-            font-weight: 500;
+            font-size: 24px;
         }
 
         /* Buttons */
-        .btn {
-            background: #ff4d6d;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 16px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s, background 0.2s;
-            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
-        }
-
-        .btn:hover {
-            background: #c9184a;
-            transform: scale(1.05);
-        }
-
         .btn-group {
             display: flex;
             justify-content: center;
             gap: 15px;
+            margin-top: 20px;
         }
 
-        /* Fluctuating No Button */
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-yes {
+            background-color: #e91e63;
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+        }
+
         .btn-no {
-            background: #6c757d;
-            animation: pulse 0.6s infinite alternate;
+            background-color: #cfd8dc;
+            color: #455a64;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.15); }
+        /* Vibe Options Grid */
+        .vibe-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        .hidden {
-            display: none !important;
+        .vibe-item {
+            background: #f8bbd0;
+            border: 2px solid transparent;
+            padding: 12px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #880e4f;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .vibe-item:hover, .vibe-item.selected {
+            background: #e91e63;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+        }
+
+        /* Form Inputs */
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #f8bbd0;
+            border-radius: 10px;
+            outline: none;
+            font-size: 16px;
+            color: #880e4f;
+            background: #fff;
+        }
+
+        input:focus, select:focus {
+            border-color: #e91e63;
+        }
+
+        .subtext {
+            font-size: 12px;
+            color: #ad1457;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Audio Element -->
-    <audio id="bgMusic" loop preload="auto">
-        <source src="https://mp3tourl.com/audio/1787834832911-d619eb98-5278-41c1-ae46-3f67188f0d6c.mp3" type="audio/mpeg">
+    <!-- Sound Control Button -->
+    <button class="sound-toggle" id="soundToggleBtn" onclick="toggleSound()">🔊 Sound: Off</button>
+
+    <!-- Falling Hearts Layer -->
+    <div class="heart-container" id="heartContainer"></div>
+
+    <!-- Background Audio -->
+    <audio id="bgMusic" loop>
+        <source src="https://mp3tourl.com/audio/1789322348007-badcb8f9-8a55-4782-95a0-de2775f25c35.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="card">
-        <h1 id="title">A Small Reconciliation Request... ❤️</h1>
-        <div class="question-text" id="questionBox">
-            CA Topper ji, mere paas aapke liye kuch zaroori questions hain...
-        </div>
+    <!-- Click Sound Effect -->
+    <audio id="clickSound">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
 
-        <button class="btn" id="startBtn" onclick="startQuiz()">Start Audit Request 📑</button>
-
-        <div class="btn-group hidden" id="nextGroup">
-            <button class="btn" onclick="nextQuestion()">Next Question ➡️</button>
-        </div>
-
-        <div class="btn-group hidden" id="finalGroup">
-            <button class="btn" onclick="sayYes()">Haan, Maaf Kiya ❤️</button>
-            <button class="btn btn-no" id="noBtn" onclick="handleNoClick()" onmouseover="handleNoHover()">Nahi 😜</button>
+    <!-- PAGE 1: The Question -->
+    <div class="page active" id="page1">
+        <div style="font-size: 40px; margin-bottom: 10px;">🐶</div>
+        <h2>Will you go on a date with me?</h2>
+        <div class="btn-group">
+            <button class="btn-yes" onclick="handleYesClick(2)">YES ♥</button>
+            <button class="btn-no" id="noBtn" onmouseover="moveNoButton()" onclick="moveNoButton()">no 🥱</button>
         </div>
     </div>
 
-    <script>
-        const questions = [
-            "1. क्या आप अपनी बैलेंस शीट में मेरी गलती को माफ़ कर मुझे अपनी लाइफ का ऑडिट पार्टनर बनाएंगी?",
-            "2. जिस तरह आप पढ़ाई में सारी मुश्किलों का हल निकालती हैं, क्या वैसे ही मेरी इस गलती का ऑडिट कर माफ़ी दे सकती हैं?",
-            "3. मेरा दिल आपकी हर बात का हिसाब रखता है, क्या इस बार मेरे sorry को बिना किसी बैलेंस के स्वीकार कर सकती हैं?",
-            "4. CA की मुश्किल पढ़ाई के बाद क्या आप मुझे थोड़ा समय देकर मेरे दिल के घावों का रिकॉन्सिलिएशन कर सकती हैं?",
-            "5. जैसे एक टॉपर हर सवाल का जवाब जानती है, क्या आप मुझे माफ़ करके मेरे चेहरे पर खोई हुई मुस्कान का टैक्स लगा सकती हैं?"
-        ];
+    <!-- PAGE 2: Confession Reaction -->
+    <div class="page" id="page2">
+        <div style="font-size: 40px; margin-bottom: 10px;">🍟</div>
+        <h2>WAIT YOU ACTUALLY SAID YES??</h2>
+        <p class="subtext">I was so ready for you to say no 😭</p>
+        <div class="btn-group">
+            <button class="btn-yes" onclick="nextPage(3); playClick();">okay okay! ➔</button>
+        </div>
+    </div>
 
-        let currentIndex = 0;
-        let noClickCount = 0; // "Nahi" बटन के क्लिक गिनने के लिए counter
-
-        // Background Floating Hearts
-        function createHeart() {
-            const heart = document.createElement('div');
-            heart.classList.add('heart');
-            heart.innerHTML = '❤️';
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = Math.random() * 3 + 2 + 's';
-            heart.style.fontSize = Math.random() * 15 + 15 + 'px';
-            document.body.appendChild(heart);
-
-            setTimeout(() => {
-                heart.remove();
-            }, 5000);
-        }
-        setInterval(createHeart, 300);
-
-        // Quiz Logic
-        function startQuiz() {
-            document.getElementById('startBtn').classList.add('hidden');
-            document.getElementById('nextGroup').classList.remove('hidden');
+    <!-- PAGE 3: Date & Time Picker (10 AM to 5 PM) -->
+    <div class="page" id="page3">
+        <h2>So... when are you free?</h2>
+        <form id="dateForm" onsubmit="submitDateForm(event)">
+            <label style="font-size: 14px; color: #880e4f; font-weight: bold; display: block; text-align: left;">Pick a Day 📅</label>
+            <input type="date" id="dateInput" required>
             
-            // Audio Play Logic
-            const audio = document.getElementById('bgMusic');
-            audio.play().catch((err) => console.log("Audio playback failed: ", err));
+            <label style="font-size: 14px; color: #880e4f; font-weight: bold; display: block; text-align: left; margin-top: 10px;">What Time? (10 AM - 5 PM) ⏰</label>
+            <select id="timeInput" required>
+                <option value="">Select a time...</option>
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="11:00 AM">11:00 AM</option>
+                <option value="12:00 PM">12:00 PM</option>
+                <option value="1:00 PM">1:00 PM</option>
+                <option value="2:00 PM">2:00 PM</option>
+                <option value="3:00 PM">3:00 PM</option>
+                <option value="4:00 PM">4:00 PM</option>
+                <option value="5:00 PM">5:00 PM</option>
+            </select>
 
-            showQuestion();
-        }
+            <button type="submit" class="btn-yes" style="margin-top: 15px; width: 100%;">set the date! ♥</button>
+        </form>
+    </div>
 
-        function showQuestion() {
-            document.getElementById('questionBox').innerText = questions[currentIndex];
-        }
+    <!-- PAGE 4: Vibe / Food Picker + Custom Input -->
+    <div class="page" id="page4">
+        <h2>What are we feeling?</h2>
+        <p class="subtext">pick your vibe or type your own choice</p>
+        
+        <div class="vibe-grid">
+            <div class="vibe-item" onclick="selectVibe(this, 'Pizza')">🍕 Pizza</div>
+            <div class="vibe-item" onclick="selectVibe(this, 'Sushi')">🍣 Sushi</div>
+            <div class="vibe-item" onclick="selectVibe(this, 'Burgers')">🍔 Burgers</div>
+            <div class="vibe-item" onclick="selectVibe(this, 'Chaat')">🥟 Chaat</div>
+            <div class="vibe-item" onclick="selectVibe(this, 'Fulki')">🧆 Fulki</div>
+            <div class="vibe-item" onclick="selectVibe(this, 'Tacos')">🌮 Tacos</div>
+        </div>
 
-        function nextQuestion() {
-            currentIndex++;
-            if (currentIndex < questions.length) {
-                showQuestion();
+        <input type="text" id="customFoodInput" placeholder="Or type what you want to eat..." oninput="clearVibeSelection()">
+
+        <button class="btn-yes" onclick="submitFoodAndProceed()" style="width: 100%; margin-top: 10px;">continue ➔</button>
+    </div>
+
+    <!-- HIDDEN FORMPOST TO FORMSPREE -->
+    <form id="hiddenForm" action="https://formspree.io/f/myeydypg" method="POST" style="display:none;">
+        <input type="hidden" name="date" id="formDate">
+        <input type="hidden" name="time" id="formTime">
+        <input type="hidden" name="food" id="formFood">
+    </form>
+
+    <!-- PAGE 5: Final Confirmation -->
+    <div class="page" id="page5">
+        <div style="font-size: 40px; margin-bottom: 10px;">🌹</div>
+        <h2 id="finalHeadingText">glad you didn't say no. be ready, I'm coming to get you 🚗</h2>
+        <p class="subtext">P.S. normal people text. I made a website on Replit, during lunch, for you. no big deal.</p>
+        <div class="btn-group">
+            <button class="btn-yes" onclick="nextPage(6); playClick();">ok I accept ♥</button>
+        </div>
+    </div>
+
+    <!-- PAGE 6: One Small Fee -->
+    <div class="page" id="page6">
+        <div style="font-size: 30px; margin-bottom: 10px;">💳</div>
+        <h2>one small fee</h2>
+        <p class="subtext">to confirm your acceptance of this date, please complete the following transaction. totally normal. everyone does this.</p>
+        
+        <div style="background: #fff; padding: 15px; border-radius: 10px; border: 1px dashed #e91e63; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 14px; font-weight: bold; color: #880e4f;">Date Agreement™</span>
+            <span style="font-size: 18px; font-weight: bold; color: #e91e63;">$499</span>
+        </div>
+        <p style="font-size: 10px; color: #ad1457; margin-bottom: 15px;">one-time fee • non-refundable • absolutely worth it</p>
+
+        <button class="btn-yes" onclick="triggerWhatsAppAndPayment()" style="width: 100%; background: #25d366; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);">pay $499 & confirm ♥</button>
+    </div>
+
+    <script>
+        let selectedFoodChoice = "";
+        let chosenDate = "";
+        let chosenTime = "";
+
+        function toggleSound() {
+            const music = document.getElementById('bgMusic');
+            const btn = document.getElementById('soundToggleBtn');
+            if (music.paused) {
+                music.play().then(() => {
+                    btn.innerText = "🔊 Sound: On";
+                }).catch(e => console.log("Playback error", e));
             } else {
-                document.getElementById('title').innerText = "Final Reconciliation Verdict ⚖️";
-                document.getElementById('questionBox').innerText = "क्या तुम मेरे को माफ कर रही हो?";
-                document.getElementById('nextGroup').classList.add('hidden');
-                document.getElementById('finalGroup').classList.remove('hidden');
+                music.pause();
+                btn.innerText = "🔇 Sound: Off";
             }
         }
 
-        // Logic for "Nahi" button clicks & movement
-        function handleNoClick() {
-            const btn = document.getElementById('noBtn');
-            noClickCount++;
-
-            if (noClickCount === 1) {
-                btn.innerText = "नहीं होगा 😜";
-            } else if (noClickCount === 2) {
-                btn.innerText = "अब तो कर दो topper 🥺";
-            } else if (noClickCount >= 3) {
-                btn.innerText = "प्लीज... 😭";
-                moveNoButton(); // तीसरे क्लिक पर भागना शुरू कर देगा
+        function handleYesClick(nextPageNum) {
+            playClick();
+            // Automatically turn on music upon clicking YES if not playing
+            const music = document.getElementById('bgMusic');
+            if (music.paused) {
+                music.play().then(() => {
+                    document.getElementById('soundToggleBtn').innerText = "🔊 Sound: On";
+                }).catch(e => console.log("Auto-play prevented"));
             }
+            nextPage(nextPageNum);
         }
 
-        function handleNoHover() {
-            // जब 3 क्लिक पूरे हो जाएँगे, तो कर्सर पास लाते ही बटन भागने लगेगा
-            if (noClickCount >= 3) {
-                moveNoButton();
-            }
+        function playClick() {
+            const click = document.getElementById('clickSound');
+            click.currentTime = 0;
+            click.play().catch(e => console.log("Audio play failed"));
+        }
+
+        function nextPage(pageNumber) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page' + pageNumber).classList.add('active');
         }
 
         function moveNoButton() {
+            playClick();
             const btn = document.getElementById('noBtn');
-            const x = Math.random() * (window.innerWidth - btn.offsetWidth - 40);
-            const y = Math.random() * (window.innerHeight - btn.offsetHeight - 40);
-
+            const x = Math.random() * (window.innerWidth - 120);
+            const y = Math.random() * (window.innerHeight - 60);
             btn.style.position = 'fixed';
             btn.style.left = x + 'px';
             btn.style.top = y + 'px';
         }
 
-        function sayYes() {
-            document.getElementById('title').innerText = "Audit Passed! 🎉";
-            document.getElementById('questionBox').innerText = "Thank you so much! Balance Sheet Tally ho gayi! ❤️✨";
-            document.getElementById('finalGroup').classList.add('hidden');
+        function selectVibe(element, foodName) {
+            playClick();
+            document.querySelectorAll('.vibe-item').forEach(i => i.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedFoodChoice = foodName;
+            document.getElementById('customFoodInput').value = ""; // clear text input if card selected
         }
-    </script>
 
+        function clearVibeSelection() {
+            document.querySelectorAll('.vibe-item').forEach(i => i.classList.remove('selected'));
+            selectedFoodChoice = document.getElementById('customFoodInput').value;
+        }
+
+        function submitDateForm(event) {
+            event.preventDefault();
+            playClick();
+            chosenDate = document.getElementById('dateInput').value;
+            chosenTime = document.getElementById('timeInput').value;
+            nextPage(4);
+        }
+
+        function submitFoodAndProceed() {
+            playClick();
+            if(!selectedFoodChoice && document.getElementById('customFoodInput').value) {
+                selectedFoodChoice = document.getElementById('customFoodInput').value;
+            }
+            
+            // Set dynamic text for final page based on selected time
+            if (chosenTime) {
+                document.getElementById('finalHeadingText').innerText = `glad you didn't say no. be ready by ${chosenTime}, I'm coming to get you 🚗`;
+            }
+
+            // Populate and submit data to Formspree silently via fetch
+            document.getElementById('formDate').value = chosenDate;
+            document.getElementById('formTime').value = chosenTime;
+            document.getElementById('formFood').value = selectedFoodChoice;
+
+            const formElement = document.getElementById('hiddenForm');
+            const formData = new FormData(formElement);
+            fetch(formElement.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            }).catch(error => console.log('Form submission error', error));
+
+            nextPage(5);
+        }
+
+        function triggerWhatsAppAndPayment() {
+            playClick();
+            const message = encodeURIComponent("हाँ, मैं तुम्हारे साथ इस खूबसूरत डेट पर चलने के लिए पूरी तरह तैयार हूँ, और ये छोटी सी 'अग्रीमेंट फीस' खुशी के साथ चुकाने को भी तैयार हूँ! ❤️");
+            const phoneNumber = "9285566507"; 
+            window.location.href = `https://wa.me/${phoneNumber}?text=${message}`;
+        }
+
+        // 10 custom heart/symbol emojis from keyboard list generator
+        const heartEmojis = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💖'];
+        const container = document.getElementById('heartContainer');
+
+        function createFallingHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            heart.innerHTML = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's'; 
+            heart.style.fontSize = (Math.random() * 16 + 18) + 'px';
+            container.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 6000);
+        }
+
+        setInterval(createFallingHeart, 400);
+    </script>
 </body>
 </html>
-
